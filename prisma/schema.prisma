@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  passwordHash  String
+  avatar        String?
+  bio           String?
+  isVerified    Boolean   @default(false)
+  verifyLevel   String    @default("none")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  platforms     Platform[]
+  works         Work[]
+}
+
+model Platform {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform    String
+  handle      String
+  displayName String?
+  followers   Int      @default(0)
+  avatar      String?
+  url         String?
+  status      String   @default("active")
+  lastSync    DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model Work {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  summary   String?
+  cover     String?
+  url       String
+  platform  String
+  tags      String   @default("[]")
+  isPinned  Boolean  @default(false)
+  views     Int      @default(0)
+  createdAt DateTime @default(now())
+}

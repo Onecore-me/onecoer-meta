@@ -1,151 +1,77 @@
 'use client'
 
-import { useState } from 'react'
-import ProfileCard from '@/components/ProfileCard'
-import PlatformLinks from '@/components/PlatformLinks'
-import WorksSection from '@/components/WorksSection'
-import AIChatWidget from '@/components/AIChatWidget'
-import ContactSection from '@/components/ContactSection'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { useAuth } from '@/contexts/AuthContext'
 import Navbar from '@/components/Navbar'
 
-// Mock user data
-const mockUser = {
-  name: '张三',
-  username: 'zhangsan',
-  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zhangsan',
-  bio: '全栈开发者 | AI爱好者 | 内容创作者',
-  isVerified: true,
-  verifyLevel: 'advanced',
-  stats: {
-    followers: 128500,
-    works: 89,
-    platforms: 12,
-  },
-}
-
-const mockPlatforms = [
-  { id: '1', platform: 'douyin', name: '抖音', handle: '@zhangsan', followers: 45000, isConnected: true },
-  { id: '2', platform: 'xiaohongshu', name: '小红书', handle: 'zhangsan', followers: 23000, isConnected: true },
-  { id: '3', platform: 'bilibili', name: 'B站', handle: 'zhangsan', followers: 18500, isConnected: true },
-  { id: '4', platform: 'weibo', name: '微博', handle: '@zhangsanofficial', followers: 12000, isConnected: true },
-  { id: '5', platform: 'youtube', name: 'YouTube', handle: 'Zhang San', followers: 28000, isConnected: true },
-  { id: '6', platform: 'github', name: 'GitHub', handle: 'zhangsan', followers: 3000, isConnected: true },
-]
-
-const mockWorks = [
-  { id: '1', type: 'video', title: '从零搭建AI助手开发环境', platform: 'bilibili', summary: '详细讲解如何配置Node.js、Next.js和OpenAI API', url: '#', cover: 'https://picsum.photos/seed/vid1/400/225', views: 12500 },
-  { id: '2', type: 'article', title: '2024年最值得学习的5个开源项目', platform: 'xiaohongshu', summary: '精选5个优质开源项目，适合各阶段开发者', url: '#', cover: 'https://picsum.photos/seed/art1/400/225', views: 8900 },
-  { id: '3', type: 'video', title: 'ChatGPT插件开发实战教程', platform: 'douyin', summary: '手把手教你开发ChatGPT插件，实现自动化办公', url: '#', cover: 'https://picsum.photos/seed/vid2/400/225', views: 15600 },
-]
-
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'home' | 'works' | 'ai'>('home')
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/dashboard')
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (user) return null
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Hero Section */}
-        <div className="mb-8">
-          <ProfileCard user={mockUser} />
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex gap-4 mb-8">
-          <button
-            onClick={() => setActiveTab('home')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'home'
-                ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                : 'bg-surface text-slate-300 hover:bg-card'
-            }`}
-          >
-            📱 平台账号
-          </button>
-          <button
-            onClick={() => setActiveTab('works')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'works'
-                ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                : 'bg-surface text-slate-300 hover:bg-card'
-            }`}
-          >
-            📚 作品展示
-          </button>
-          <button
-            onClick={() => setActiveTab('ai')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'ai'
-                ? 'bg-secondary text-white shadow-lg shadow-secondary/30'
-                : 'bg-surface text-slate-300 hover:bg-card'
-            }`}
-          >
-            🤖 AI 助手
-          </button>
-        </div>
-
-        {/* Content Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            {activeTab === 'home' && (
-              <>
-                <PlatformLinks platforms={mockPlatforms} />
-                <ContactSection />
-              </>
-            )}
-            {activeTab === 'works' && (
-              <WorksSection works={mockWorks} />
-            )}
-            {activeTab === 'ai' && (
-              <AIChatWidget />
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="bg-surface rounded-xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold mb-4">📊 数据概览</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">总粉丝</span>
-                  <span className="text-xl font-bold text-primary">{(mockUser.stats.followers / 1000).toFixed(1)}K</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">作品数</span>
-                  <span className="text-xl font-bold text-secondary">{mockUser.stats.works}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">平台数</span>
-                  <span className="text-xl font-bold text-accent">{mockUser.stats.platforms}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-surface rounded-xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold mb-4">🔥 热门作品</h3>
-              <div className="space-y-3">
-                {mockWorks.slice(0, 2).map((work) => (
-                  <div key={work.id} className="flex gap-3 items-start">
-                    <img src={work.cover} alt={work.title} className="w-16 h-12 rounded object-cover" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{work.title}</p>
-                      <p className="text-xs text-slate-400">{work.views.toLocaleString()} 阅读</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10" />
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+        
+        <Navbar />
+        
+        <main className="container mx-auto px-4 py-20 max-w-6xl relative">
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              你的全网身份中枢
+            </h1>
+            <p className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
+              聚合展示你的所有社交媒体账号、作品集和联系方式。一个链接，让世界认识完整的你。
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/register" className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 rounded-xl font-semibold text-lg transition-all shadow-lg shadow-indigo-500/30">
+                立即开始
+              </Link>
+              <Link href="/login" className="px-8 py-4 bg-surface hover:bg-slate-700 border border-slate-700 rounded-xl font-semibold text-lg transition-all">
+                登录账号
+              </Link>
             </div>
           </div>
-        </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800 mt-16 py-8">
-        <div className="container mx-auto px-4 text-center text-slate-500">
-          <p>© 2024 OneCore. 你的全网身份中枢</p>
-        </div>
-      </footer>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-surface/50 backdrop-blur border border-slate-700 rounded-2xl p-8 text-center">
+              <div className="text-5xl mb-4">🔗</div>
+              <h3 className="text-xl font-bold mb-2">平台聚合</h3>
+              <p className="text-slate-400">一站式展示抖音、小红书、B站等20+平台账号</p>
+            </div>
+            <div className="bg-surface/50 backdrop-blur border border-slate-700 rounded-2xl p-8 text-center">
+              <div className="text-5xl mb-4">🤖</div>
+              <h3 className="text-xl font-bold mb-2">AI 助手</h3>
+              <p className="text-slate-400">智能分析数据、生成内容、制定运营策略</p>
+            </div>
+            <div className="bg-surface/50 backdrop-blur border border-slate-700 rounded-2xl p-8 text-center">
+              <div className="text-5xl mb-4">🔐</div>
+              <h3 className="text-xl font-bold mb-2">实名认证</h3>
+              <p className="text-slate-400">建立网络信任，让合作更放心</p>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }
