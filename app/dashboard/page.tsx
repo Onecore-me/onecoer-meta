@@ -2,18 +2,36 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth()
   const router = useRouter()
+  const [stats, setStats] = useState({ followers: 0, platforms: 0, works: 0 })
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login')
     }
   }, [user, loading, router])
+
+  useEffect(() => {
+    if (user?.stats) {
+      setStats(user.stats)
+    }
+  }, [user])
+
+  // Fetch latest stats from API
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token || !user) return
+    fetch('/api/auth', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).then(r => r.ok ? r.json() : null).then(data => {
+      if (data?.user?.stats) setStats(data.user.stats)
+    }).catch(() => {})
+  }, [user])
 
   if (loading) {
     return (
@@ -79,15 +97,15 @@ export default function DashboardPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center p-4 bg-card rounded-xl">
                 <span className="text-slate-400">总粉丝</span>
-                <span className="text-2xl font-bold text-indigo-400">0</span>
+                <span className="text-2xl font-bold text-indigo-400">{stats.followers.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-card rounded-xl">
                 <span className="text-slate-400">连接平台</span>
-                <span className="text-2xl font-bold text-purple-400">0</span>
+                <span className="text-2xl font-bold text-purple-400">{stats.platforms}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-card rounded-xl">
                 <span className="text-slate-400">作品数</span>
-                <span className="text-2xl font-bold text-amber-400">0</span>
+                <span className="text-2xl font-bold text-amber-400">{stats.works}</span>
               </div>
             </div>
           </div>
