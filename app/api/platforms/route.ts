@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'onecore-secret-key-change-in-production'
+const JWT_SECRET = process.env.JWT_SECRET || 'onecore-dev-secret-do-not-use-in-production'
 
 async function getUserId(request: NextRequest) {
   const token = request.headers.get('authorization')?.replace('Bearer ', '')
